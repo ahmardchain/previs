@@ -43,25 +43,29 @@ export function Header() {
   }
 
   return (
-    <header style={{ position: "sticky", top: 0, zIndex: 20, background: "rgba(10,10,11,.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--line-soft)" }}>
+    <header style={{ position: "sticky", top: 0, zIndex: 20, background: "rgba(10,10,11,.85)", backdropFilter: "blur(12px)" }}>
       <div className="container" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 20, paddingTop: 14, paddingBottom: 14 }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--text)" }}>
           <Logo />
           <span style={{ fontFamily: "var(--display)", fontWeight: 700, fontSize: 19, letterSpacing: ".14em" }}>PREVIS</span>
         </Link>
-        <nav aria-label="Main" style={{ display: "flex", flexWrap: "wrap", gap: 2, flex: "1 1 auto" }}>
-          {NAV.map((n) => {
-            const active = n.href === "/" ? path === "/" || path.startsWith("/market") : path.startsWith(n.href);
-            return (
-              <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined}
-                style={{ padding: "10px 14px", borderRadius: 999, fontSize: 14, fontWeight: active ? 600 : 500, color: active ? "var(--text)" : "var(--muted)" }}>
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <div style={{ flex: "1 1 auto", display: "flex", justifyContent: "center" }}>
+          <nav aria-label="Main" style={{ display: "flex", gap: 4, padding: 5, borderRadius: 999, background: "var(--surface)", border: "1px solid var(--line)" }}>
+            {NAV.map((n) => {
+              const active = n.href === "/" ? path === "/" || path.startsWith("/market") : path.startsWith(n.href);
+              return (
+                <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined} className="nav-pill"
+                  style={{ padding: "9px 18px", borderRadius: 999, fontSize: 14, fontWeight: 600, whiteSpace: "nowrap",
+                    background: active ? "#fff" : "transparent", color: active ? "var(--ink)" : "var(--muted)" }}>
+                  {n.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
         {status && (
-          <span className="pill hide-sm" title="Where memories and on-chain reads go" style={{ border: "1px solid var(--line)", color: "var(--muted)" }}>
+          <span className="pill hide-sm" title="Where memories and on-chain reads go"
+            style={{ minHeight: 44, padding: "0 14px", background: "var(--surface)", border: "1px solid var(--line)", color: "var(--muted)" }}>
             <span className="sync-dot" style={{ background: status.walrus === "mainnet" ? "var(--yes)" : "#fdba74" }} />
             Walrus {status.walrus === "mainnet" ? "Mainnet" : "demo"} · Tatum {status.tatum === "live" ? "live" : "demo"}
           </span>

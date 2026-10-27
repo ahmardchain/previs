@@ -95,3 +95,6 @@ button { font-family: var(--body); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+.nav-pill { transition: background-color .2s, color .2s; }
+.nav-pill:not([aria-current="page"]):hover { color: var(--text) !important; background: var(--raise) !important; }
