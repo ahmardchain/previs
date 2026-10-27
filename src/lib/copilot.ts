@@ -264,10 +264,14 @@ async function maybePolish(text: string, question: string, advice: Advice): Prom
       // Free on Cloudflare's Workers Free plan (10,000 neurons/day).
       const r = (await ai.run(process.env.WORKERS_AI_MODEL || "@cf/google/gemma-4-26b-a4b-it", {
         messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
-        max_tokens: 200,
-      })) as { response?: string; choices?: { message?: { content?: string } }[] };
-      out = r.response ?? r.choices?.[0]?.message?.content;
-      lastAiNote = out ? null : `Workers AI returned no text: ${JSON.stringify(r).slice(0, 160)}`;
+        // Gemma 4 reasons before answering; leave room for both.
+        max_tokens: 1024,
+      })) as { response?: string; choices?: { message?: { content?: unknown } }[] };
+      const c = r.choices?.[0]?.message?.content;
+      out =
+        r.response ??
+        (typeof c === "string" ? c : Array.isArray(c) ? c.map((p: { text?: string }) => p?.text ?? "").join("") : undefined);
+      lastAiNote = out ? null : `Workers AI returned no text: ${JSON.stringify(r.choices?.[0] ?? r).slice(0, 300)}`;
     } else if (process.env.ANTHROPIC_API_KEY) {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
