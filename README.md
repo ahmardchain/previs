@@ -384,7 +384,7 @@ Built by **Ahmad (AHMARD)** for the Total Recall hackathon.
 | | |
 |---|---|
 | X | [@ahmardchain](https://x.com/ahmardchain) · [launch post](https://x.com/Ahmardchain/status/2115117118614069404) |
-| Telegram | [@leveltechceo](https://t.me/leveltechceo) |
+| Telegram | [@ahmardchain](https://t.me/ahmardchain) |
 | GitHub | [ahmardchain](https://github.com/ahmardchain) |
 
 ---
