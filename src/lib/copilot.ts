@@ -22,6 +22,8 @@ export interface Advice {
 
 export interface CopilotReply {
   text: string;
+  /** Whether Workers AI phrased this reply, or why not (diagnostics). */
+  ai?: string;
   advice?: Advice;
   learned?: string;
   suggestions: string[];
@@ -220,8 +222,11 @@ export async function ask(userId: string, question: string, marketId?: string): 
   }
   if (learned) text = `Noted — I'll remember that. ${text}`;
 
+  const draft = text;
+  lastAiNote = null;
   text = await maybePolish(text, q, advice);
-  return { text, advice, learned, suggestions: ["Should I go big?", "What does the % mean?", "What if I lose?"] };
+  const ai = text !== draft ? "used" : `draft (${lastAiNote ?? "no change"})`;
+  return { text, advice, learned, ai, suggestions: ["Should I go big?", "What does the % mean?", "What if I lose?"] };
 }
 
 // The AI layer phrases the answer naturally. The numbers always come from
