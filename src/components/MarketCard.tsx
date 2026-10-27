@@ -58,7 +58,7 @@ export function MarketCard({ m }: { m: MarketDTO }) {
         <Spark data={m.history} />
         <span style={{ fontSize: 13, color: "var(--muted)" }}>{formatVolume(m.volume)} vol.</span>
         <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, letterSpacing: ".06em", color: "var(--lime)" }}>
-          COPILOT {m.pick.side.toUpperCase()}
+          AI PICK: {m.pick.side.toUpperCase()}
         </span>
       </div>
     </article>

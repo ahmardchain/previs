@@ -133,7 +133,7 @@ export function CopilotChat({ marketId, compact = false, onUse }: { marketId?: s
                 <svg width="38" height="38" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="#0a0a0b" strokeWidth="2.6" /><circle cx="15" cy="15" r="4.5" fill="#0a0a0b" /></svg>
               </span>
             )}
-            {!compact && <h1 className="display fade-up" style={{ margin: 0, fontSize: 36, fontWeight: 700 }}>Hi, I&apos;m your Copilot</h1>}
+            {!compact && <h1 className="display fade-up" style={{ margin: 0, fontSize: 36, fontWeight: 700 }}>Hi, I&apos;m your AI Copilot</h1>}
             <p className="muted" style={{ margin: 0, maxWidth: 420, lineHeight: 1.6, fontSize: compact ? 14 : 15 }}>
               {sel ? `Ask me anything about “${sel.title}”.` : "Pick any market below, or just ask. I'll give you a simple pick and how much to put in."}
             </p>
@@ -196,7 +196,7 @@ export function CopilotChat({ marketId, compact = false, onUse }: { marketId?: s
           <form onSubmit={(e) => { e.preventDefault(); send(input); }} style={{ display: "flex", gap: 8 }}>
             <label style={{ flex: 1 }}>
               <span className="sr-only">Ask the copilot</span>
-              <input className="input" placeholder="Ask Copilot…" value={input} onChange={(e) => setInput(e.target.value)} maxLength={2000} />
+              <input className="input" placeholder="Ask AI Copilot…" value={input} onChange={(e) => setInput(e.target.value)} maxLength={2000} />
             </label>
             <button type="submit" aria-label="Send" className="btn btn-lime" disabled={busy || !input.trim()} style={{ width: 50, height: 50, padding: 0, borderRadius: 14 }}>↑</button>
           </form>

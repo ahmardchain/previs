@@ -76,7 +76,7 @@ export default function Portfolio() {
           <span className="eyebrow" style={{ marginBottom: 10 }}>Pick journal</span>
           {picks === null && <p className="muted">Loading…</p>}
           {picks && picks.length === 0 && (
-            <p className="muted" style={{ lineHeight: 1.6 }}>No picks yet. <Link href="/">Pick a market</Link> or ask the <Link href="/copilot">copilot</Link>.</p>
+            <p className="muted" style={{ lineHeight: 1.6 }}>No picks yet. <Link href="/">Pick a market</Link> or ask the <Link href="/copilot">AI Copilot</Link>.</p>
           )}
           {(picks ?? []).map((p) => (
             <div key={p.id} style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", padding: "14px 0", borderTop: "1px solid var(--line-soft)" }}>

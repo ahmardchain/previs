@@ -54,7 +54,7 @@ let cache: DB | null = null;
 
 function seed(): DB {
   const callers: Caller[] = [
-    { id: "caller:copilot", name: "Previs Copilot", bio: "The house AI. Every call saved before the event." },
+    { id: "caller:copilot", name: "Previs AI Copilot", bio: "The house AI. Every call saved before the event." },
     { id: "caller:lagos-quant", name: "lagos-quant", bio: "Model-driven football picks." },
     { id: "caller:0x7a3e", name: "0x7a3e…41c2", bio: "Crypto swing trader." },
     { id: "caller:hype-hunter", name: "hype-hunter", bio: "Loud, confident, often early." },

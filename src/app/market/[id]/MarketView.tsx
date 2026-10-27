@@ -125,7 +125,7 @@ export function MarketView({ market }: { market: Market }) {
               <svg width="22" height="22" viewBox="0 0 30 30"><circle cx="15" cy="15" r="11" fill="none" stroke="#0a0a0b" strokeWidth="2.8" /><circle cx="15" cy="15" r="4.5" fill="#0a0a0b" /></svg>
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span className="display" style={{ fontWeight: 700, fontSize: 16, letterSpacing: 0 }}>Copilot</span>
+              <span className="display" style={{ fontWeight: 700, fontSize: 16, letterSpacing: 0 }}>AI Copilot</span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--muted)" }}><span className="sync-dot" style={{ background: "var(--yes)" }} />Remembers you</span>
             </div>
           </div>

@@ -6,7 +6,7 @@ const COLS: { title: string; links: { label: string; href: string; external?: bo
     title: "Product",
     links: [
       { label: "Markets", href: "/" },
-      { label: "Copilot", href: "/copilot" },
+      { label: "AI Copilot", href: "/copilot" },
       { label: "My picks", href: "/portfolio" },
     ],
   },

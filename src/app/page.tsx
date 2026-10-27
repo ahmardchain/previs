@@ -51,7 +51,7 @@ export default function Home() {
         </div>
         <div style={{ flex: "1 1 300px", display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "flex-end" }}>
           <a href="#markets" className="btn btn-ghost" style={{ minHeight: 52, letterSpacing: ".14em" }}>START TRADING →</a>
-          <Link href="/copilot" className="btn btn-lime" style={{ minHeight: 52, letterSpacing: ".14em" }}>ASK COPILOT</Link>
+          <Link href="/copilot" className="btn btn-lime" style={{ minHeight: 52, letterSpacing: ".14em" }}>ASK AI COPILOT</Link>
         </div>
       </section>
 
@@ -116,7 +116,7 @@ export default function Home() {
           <a href="#markets" className="btn" style={{ background: "var(--line)", color: "var(--text)", letterSpacing: ".16em", fontSize: 13 }}>MARKETS</a>
           <Link href="/portfolio" className="btn" style={{ color: "var(--muted)", letterSpacing: ".16em", fontSize: 13, whiteSpace: "nowrap" }}>MY PICKS</Link>
         </div>
-        <Link href="/copilot" aria-label="Open copilot" className="btn btn-lime" style={{ width: 56, height: 56, padding: 0, fontSize: 22 }}>✦</Link>
+        <Link href="/copilot" aria-label="Open AI Copilot" className="btn btn-lime" style={{ width: 56, height: 56, padding: 0, fontSize: 22 }}>✦</Link>
       </nav>
     </main>
   );

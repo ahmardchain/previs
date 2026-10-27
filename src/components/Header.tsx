@@ -16,7 +16,7 @@ export function Logo({ size = 30 }: { size?: number }) {
 const NAV = [
   { href: "/", label: "Markets" },
   { href: "/portfolio", label: "Portfolio" },
-  { href: "/copilot", label: "Copilot" },
+  { href: "/copilot", label: "AI Copilot" },
 ];
 
 export function Header() {
