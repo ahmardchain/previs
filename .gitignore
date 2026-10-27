@@ -43,3 +43,8 @@ next-env.d.ts
 # local demo store
 .data/
 !.env.example
+
+# cloudflare
+.open-next/
+.wrangler/
+.dev.vars*

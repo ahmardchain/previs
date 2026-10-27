@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { getMarket } from "@/lib/markets";
-import { db, save, isOpen, type Pick, type Side } from "@/lib/store";
+import { db, save, isOpen, type Pick, type Side, load, flush } from "@/lib/store";
 import { remember, userNs, fingerprint } from "@/lib/memory";
 import { latestCheckpoint } from "@/lib/sui";
 import { BALANCE } from "@/lib/copilot";
@@ -9,13 +9,16 @@ import { userIdFrom } from "@/lib/user";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  await load();
   const userId = userIdFrom(new URL(req.url).searchParams.get("userId"));
   if (!userId) return Response.json([]);
   const picks = db().picks.filter((p) => p.userId === userId).slice().reverse();
+  await flush();
   return Response.json(picks.map((p) => ({ ...p, marketTitle: getMarket(p.marketId)?.title ?? p.marketId })));
 }
 
 export async function POST(req: Request) {
+  await load();
   const body = (await req.json().catch(() => ({}))) as {
     userId?: string; marketId?: string; side?: Side; stake?: number; confidence?: number; source?: "user" | "copilot";
   };
@@ -57,5 +60,6 @@ export async function POST(req: Request) {
     db().picks.push({ ...pick, id: randomUUID(), userId: "caller:copilot", stake: 0, source: "caller" });
   }
   save();
+  await flush();
   return Response.json({ ...pick, marketTitle: market.title, receipt: text });
 }

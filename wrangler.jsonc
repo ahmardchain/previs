@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "previs",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-13",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "previs" }],
+  // Picks, scores and the local memory index. Learning itself lives in Walrus Memory.
+  "kv_namespaces": [{ "binding": "PREVIS_KV", "id": "a8f2770779bd436882b42ed2b3188614" }],
+  "vars": {
+    "MEMWAL_SERVER_URL": "https://relayer.memory.walrus.xyz",
+    "MEMWAL_NAMESPACE": "previs",
+    "TATUM_SUI_RPC": "https://sui-mainnet.gateway.tatum.io"
+  },
+  // Secrets (set in the dashboard or with `wrangler secret put`):
+  // MEMWAL_KEY, MEMWAL_ACCOUNT_ID, TATUM_API_KEY, optional ANTHROPIC_API_KEY, PREVIS_ADMIN_KEY
+  "observability": { "enabled": true }
+}

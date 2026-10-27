@@ -39,6 +39,17 @@ npm run dev
 
 Without keys the app still runs in **demo mode** (memories go to a local file, no checkpoints). The header shows which mode is live.
 
+## Deploy to Cloudflare Workers
+
+The app runs on Workers through the OpenNext adapter. Picks and scores persist in a KV namespace (`PREVIS_KV`, already in `wrangler.jsonc`); the learning lives in Walrus Memory.
+
+**From the dashboard (auto-deploys on every push):** Workers & Pages → Create → Import a repository → `previs`.
+- Build command: `npx opennextjs-cloudflare build`
+- Deploy command: `npx opennextjs-cloudflare deploy`
+- Settings → Variables and Secrets → add `MEMWAL_KEY`, `MEMWAL_ACCOUNT_ID`, `TATUM_API_KEY` (and optionally `ANTHROPIC_API_KEY`, `PREVIS_ADMIN_KEY`) as **secrets**.
+
+**From your machine:** `npx wrangler login`, then `npm run deploy`. Add secrets with `npx wrangler secret put MEMWAL_KEY` (repeat for each).
+
 ## Demo script (3 minutes)
 
 1. **Copilot** → type `My limit is 3% per trade` → "Remembered" chip appears.
@@ -52,7 +63,7 @@ That flow writes 10+ memories to Walrus Mainnet.
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · `@mysten-incubation/memwal` · Tatum Sui RPC gateway · optional Claude for phrasing (numbers always come from Previs's own logic).
+Next.js 16 (App Router) on Cloudflare Workers (OpenNext + KV) · TypeScript · `@mysten-incubation/memwal` · Tatum Sui RPC gateway · optional Claude for phrasing (numbers always come from Previs's own logic).
 
 ## Hackathon checklist
 

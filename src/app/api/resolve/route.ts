@@ -1,5 +1,5 @@
 import { getMarket } from "@/lib/markets";
-import { db, save, credibility, isOpen, shortId, type Side } from "@/lib/store";
+import { db, save, credibility, isOpen, shortId, type Side, load, flush } from "@/lib/store";
 import { remember, userNs, CRED_NS } from "@/lib/memory";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 //  - each caller's credibility is updated (shared credibility namespace)
 // Demo-only: in production this is driven by an oracle / results feed.
 export async function POST(req: Request) {
+  await load();
   const admin = process.env.PREVIS_ADMIN_KEY;
   if (admin && req.headers.get("x-admin-key") !== admin) return Response.json({ error: "Not allowed" }, { status: 403 });
 
@@ -40,5 +41,6 @@ export async function POST(req: Request) {
     }
   }
   await Promise.all(writes);
+  await flush();
   return Response.json({ marketId: market.id, outcome, graded: open.length });
 }

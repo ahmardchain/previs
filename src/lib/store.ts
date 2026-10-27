@@ -105,6 +105,44 @@ function seed(): DB {
   return { picks, callers, resolutions: [], memories: [] };
 }
 
+interface KV { get(key: string): Promise<string | null>; put(key: string, value: string): Promise<void> }
+const KV_KEY = "previs:db:v1";
+let dirty = false;
+
+async function kv(): Promise<KV | null> {
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const ctx = await getCloudflareContext({ async: true });
+    return ((ctx.env as Record<string, unknown>).PREVIS_KV as KV) ?? null;
+  } catch {
+    return null; // plain `next dev` / `next start`: use the local file
+  }
+}
+
+/** Call at the start of every API request. On Workers this pulls the latest state from KV. */
+export async function load(): Promise<DB> {
+  const store = await kv();
+  if (store) {
+    const raw = await store.get(KV_KEY);
+    cache = raw ? (JSON.parse(raw) as DB) : seed();
+    if (!raw) dirty = true;
+    return cache;
+  }
+  return db();
+}
+
+/** Call after mutating requests. Writes to KV on Workers (the file is written in save()). */
+export async function flush() {
+  if (!dirty) return;
+  const store = await kv();
+  if (store && cache) {
+    // Keep KV values comfortably small: the memory mirror only needs recent entries.
+    if (cache.memories.length > 2000) cache.memories = cache.memories.slice(-2000);
+    await store.put(KV_KEY, JSON.stringify(cache));
+  }
+  dirty = false;
+}
+
 export function db(): DB {
   if (cache) return cache;
   try {
@@ -118,11 +156,12 @@ export function db(): DB {
 
 export function save() {
   if (!cache) return;
+  dirty = true;
   try {
     fs.mkdirSync(DIR, { recursive: true });
     fs.writeFileSync(FILE, JSON.stringify(cache, null, 2));
-  } catch (e) {
-    console.warn("[store] could not persist", e);
+  } catch {
+    // Read-only filesystem (Workers): KV via flush() is the store.
   }
 }
 
