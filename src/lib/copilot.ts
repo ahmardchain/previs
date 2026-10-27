@@ -224,28 +224,54 @@ export async function ask(userId: string, question: string, marketId?: string): 
   return { text, advice, learned, suggestions: ["Should I go big?", "What does the % mean?", "What if I lose?"] };
 }
 
-// Optional: let Claude phrase the answer more naturally. The numbers always
-// come from `advise`, never from the model.
-async function maybePolish(text: string, question: string, advice: Advice): Promise<string> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return text;
+// The AI layer phrases the answer naturally. The numbers always come from
+// `advise`, never from the model — if a reply drops or changes a number, we
+// fall back to the plain draft.
+const SYSTEM =
+  "You are Previs AI Copilot, a friendly trading buddy for beginners on a paper-trading prediction market. Rewrite the draft answer in 1-3 short plain sentences. Keep every number exactly as given. No jargon, no disclaimers, no markdown.";
+
+interface AIBinding { run(model: string, input: unknown): Promise<unknown> }
+
+async function workersAI(): Promise<AIBinding | null> {
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5",
-        max_tokens: 200,
-        system:
-          "You are Previs Copilot, a friendly trading buddy for beginners on a paper-trading prediction market. Rewrite the draft answer in 1-3 short plain sentences. Keep every number exactly as given. No jargon, no financial advice disclaimers, no markdown.",
-        messages: [{ role: "user", content: `Question: ${question}\nDraft answer: ${text}\nFacts: ${JSON.stringify({ reasons: advice.reasons, because: advice.because })}` }],
-      }),
-      signal: AbortSignal.timeout(8000),
-    });
-    const json = (await res.json()) as { content?: { type: string; text: string }[] };
-    const out = json.content?.find((c) => c.type === "text")?.text?.trim();
-    return out || text;
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const ctx = await getCloudflareContext({ async: true });
+    return ((ctx.env as Record<string, unknown>).AI as AIBinding) ?? null;
   } catch {
-    return text;
+    return null;
   }
+}
+
+function keepsNumbers(draft: string, out: string) {
+  const nums = draft.match(/\d+(?:\.\d+)?/g) ?? [];
+  return nums.every((n) => out.includes(n));
+}
+
+async function maybePolish(text: string, question: string, advice: Advice): Promise<string> {
+  const user = `Question: ${question}\nDraft answer: ${text}\nFacts: ${JSON.stringify({ reasons: advice.reasons, because: advice.because })}`;
+  let out: string | undefined;
+  try {
+    const ai = await workersAI();
+    if (ai) {
+      // Free on Cloudflare's Workers Free plan (10,000 neurons/day).
+      const r = (await ai.run(process.env.WORKERS_AI_MODEL || "@cf/google/gemma-4-26b-a4b-it", {
+        messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
+        max_tokens: 200,
+      })) as { response?: string; choices?: { message?: { content?: string } }[] };
+      out = r.response ?? r.choices?.[0]?.message?.content;
+    } else if (process.env.ANTHROPIC_API_KEY) {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+        body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5", max_tokens: 200, system: SYSTEM, messages: [{ role: "user", content: user }] }),
+        signal: AbortSignal.timeout(8000),
+      });
+      const json = (await res.json()) as { content?: { type: string; text: string }[] };
+      out = json.content?.find((c) => c.type === "text")?.text;
+    }
+  } catch (e) {
+    console.warn("[ai] phrasing failed, using draft", e);
+  }
+  out = out?.trim();
+  return out && keepsNumbers(text, out) ? out : text;
 }

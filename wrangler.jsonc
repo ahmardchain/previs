@@ -8,6 +8,8 @@
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "previs" }],
   // Picks, scores and the local memory index. Learning itself lives in Walrus Memory.
   "kv_namespaces": [{ "binding": "PREVIS_KV", "id": "a8f2770779bd436882b42ed2b3188614" }],
+  // Workers AI: free daily allocation, used to phrase AI Copilot replies.
+  "ai": { "binding": "AI" },
   "vars": {
     "MEMWAL_SERVER_URL": "https://relayer.memory.walrus.xyz",
     "MEMWAL_NAMESPACE": "previs",

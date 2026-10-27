@@ -63,7 +63,7 @@ That flow writes 10+ memories to Walrus Mainnet.
 
 ## Stack
 
-Next.js 16 (App Router) on Cloudflare Workers (OpenNext + KV) · TypeScript · `@mysten-incubation/memwal` · Tatum Sui RPC gateway · optional Claude for phrasing (numbers always come from Previs's own logic).
+Next.js 16 (App Router) on Cloudflare Workers (OpenNext + KV) · TypeScript · `@mysten-incubation/memwal` · Tatum Sui RPC gateway · Cloudflare Workers AI (free tier, Gemma 4) phrases AI Copilot replies — numbers always come from Previs's own logic, and any reply that changes a number is discarded.
 
 ## Hackathon checklist
 
