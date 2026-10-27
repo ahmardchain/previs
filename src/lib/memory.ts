@@ -35,7 +35,7 @@ export interface Memory {
   relevance?: number;
 }
 
-export async function remember(namespace: string, text: string, wait = true): Promise<{ blobId: string; live: boolean }> {
+export async function remember(namespace: string, text: string, wait = false): Promise<{ blobId: string; live: boolean }> {
   if (walrusLive) {
     try {
       const m = memwal();
@@ -65,7 +65,15 @@ export async function recall(namespace: string, query: string, limit = 6): Promi
   if (walrusLive) {
     try {
       const r = await memwal().recall({ query, limit, namespace });
-      return r.results.map((x) => ({ text: x.text, blobId: x.blob_id, relevance: 1 - x.distance }));
+      const found = r.results.map((x) => ({ text: x.text, blobId: x.blob_id, relevance: 1 - x.distance }) as Memory);
+      // Walrus indexes in the background; include what we wrote in the last few
+      // minutes so a fact the user just told us is used straight away.
+      const seen = new Set(found.map((m) => m.text));
+      const cutoff = Date.now() - 10 * 60 * 1000;
+      const fresh = db().memories
+        .filter((m) => m.namespace === namespace && !seen.has(m.text) && Date.parse(m.createdAt) > cutoff)
+        .map((m) => ({ text: m.text, blobId: m.blobId, createdAt: m.createdAt }));
+      return [...fresh, ...found].slice(0, limit + fresh.length);
     } catch (e) {
       console.error("[walrus] recall failed, using local mirror", e);
     }
@@ -94,4 +102,31 @@ export function totalWritten() {
 
 export function fingerprint(text: string) {
   return createHash("sha256").update(text).digest("hex");
+}
+
+/** Fill in Walrus blob ids for memories that were written asynchronously. */
+export async function resolvePending(namespace?: string, max = 8): Promise<boolean> {
+  if (!walrusLive) return false;
+  const pending = db().memories.filter((m) => m.blobId.startsWith("pending:") && (!namespace || m.namespace === namespace)).slice(-max);
+  if (!pending.length) return false;
+  let changed = false;
+  await Promise.all(
+    pending.map(async (m) => {
+      try {
+        const s = await memwal().getRememberStatus(m.blobId.slice("pending:".length));
+        if (s.blob_id) { m.blobId = s.blob_id; changed = true; }
+        else if (s.status === "failed" || s.status === "not_found") { m.blobId = `failed:${m.blobId.slice(8)}`; changed = true; }
+      } catch { /* try again next time */ }
+    }),
+  );
+  if (changed) {
+    for (const p of db().picks) {
+      if (p.blobId?.startsWith("pending:")) {
+        const hit = db().memories.find((m) => m.text && p.fingerprint === fingerprint(m.text));
+        if (hit && !hit.blobId.startsWith("pending:")) p.blobId = hit.blobId;
+      }
+    }
+    save();
+  }
+  return changed;
 }

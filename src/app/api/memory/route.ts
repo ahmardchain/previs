@@ -1,5 +1,5 @@
 import { load, flush } from "@/lib/store";
-import { remember, written, userNs, walrusLive, totalWritten } from "@/lib/memory";
+import { remember, written, userNs, walrusLive, totalWritten, resolvePending } from "@/lib/memory";
 import { userIdFrom } from "@/lib/user";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   await load();
   const userId = userIdFrom(new URL(req.url).searchParams.get("userId"));
+  if (userId) await resolvePending(userNs(userId));
   const mine = userId ? written(userNs(userId)) : [];
   await flush();
   return Response.json({

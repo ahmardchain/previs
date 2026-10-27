@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { getMarket } from "@/lib/markets";
 import { db, save, isOpen, type Pick, type Side, load, flush } from "@/lib/store";
-import { remember, userNs, fingerprint } from "@/lib/memory";
+import { remember, userNs, fingerprint, resolvePending } from "@/lib/memory";
 import { latestCheckpoint } from "@/lib/sui";
 import { BALANCE } from "@/lib/copilot";
 import { userIdFrom } from "@/lib/user";
@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   await load();
   const userId = userIdFrom(new URL(req.url).searchParams.get("userId"));
   if (!userId) return Response.json([]);
+  await resolvePending(userNs(userId));
   const picks = db().picks.filter((p) => p.userId === userId).slice().reverse();
   await flush();
   return Response.json(picks.map((p) => ({ ...p, marketTitle: getMarket(p.marketId)?.title ?? p.marketId })));

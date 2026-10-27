@@ -103,7 +103,7 @@ export default function Portfolio() {
             {mine.slice(0, 12).map((m) => (
               <div key={m.blobId + m.text} style={{ padding: "10px 12px", borderRadius: 14, background: "var(--inset)", border: "1px solid var(--line-soft)", fontSize: 13, lineHeight: 1.5 }}>
                 {humanize(m.text)}
-                <div style={{ fontSize: 11, color: "var(--faint)", marginTop: 4, wordBreak: "break-all" }}>{m.blobId.startsWith("local-") ? "demo memory" : `Walrus blob ${m.blobId.slice(0, 20)}…`}</div>
+                <div style={{ fontSize: 11, color: "var(--faint)", marginTop: 4, wordBreak: "break-all" }}>{m.blobId.startsWith("local-") ? "demo memory" : m.blobId.startsWith("pending:") ? "Saving to Walrus Mainnet…" : m.blobId.startsWith("failed:") ? "Walrus write failed" : `Walrus blob ${m.blobId.slice(0, 20)}…`}</div>
               </div>
             ))}
           </section>

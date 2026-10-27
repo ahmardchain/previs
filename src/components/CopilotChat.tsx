@@ -66,7 +66,7 @@ function AdviceCard({ a, onUse }: { a: AdviceDTO; onUse?: (a: AdviceDTO) => void
           </span>
           <span style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.6, wordBreak: "break-all" }}>
             {receipt.checkpoint ? <>Sui checkpoint #{receipt.checkpoint} · </> : null}
-            Walrus blob {receipt.blobId?.slice(0, 18)}… · fingerprint {receipt.fingerprint.slice(0, 12)}
+            {receipt.blobId?.startsWith("pending:") ? "Writing to Walrus Mainnet…" : `Walrus blob ${receipt.blobId?.slice(0, 18)}…`} · fingerprint {receipt.fingerprint.slice(0, 12)}
           </span>
         </div>
       ) : (
