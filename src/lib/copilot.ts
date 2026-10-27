@@ -262,11 +262,13 @@ async function maybePolish(text: string, question: string, advice: Advice): Prom
     if (!ai) lastAiNote = "No Workers AI binding";
     if (ai) {
       // Free on Cloudflare's Workers Free plan (10,000 neurons/day).
-      const r = (await ai.run(process.env.WORKERS_AI_MODEL || "@cf/google/gemma-4-26b-a4b-it", {
+      // A small, fast model: replies are 1–3 sentences, so speed beats size.
+      const run = ai.run(process.env.WORKERS_AI_MODEL || "@cf/meta/llama-3.1-8b-instruct-fast", {
         messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
-        // Gemma 4 reasons before answering; leave room for both.
-        max_tokens: 1024,
-      })) as { response?: string; choices?: { message?: { content?: unknown } }[] };
+        max_tokens: 160,
+      });
+      const timeout = new Promise<never>((_, rej) => setTimeout(() => rej(new Error("AI timeout")), 6000));
+      const r = (await Promise.race([run, timeout])) as { response?: string; choices?: { message?: { content?: unknown } }[] };
       const c = r.choices?.[0]?.message?.content;
       out =
         r.response ??
