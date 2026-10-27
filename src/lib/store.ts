@@ -126,6 +126,9 @@ export async function load(): Promise<DB> {
     const raw = await store.get(KV_KEY);
     cache = raw ? (JSON.parse(raw) as DB) : seed();
     if (!raw) dirty = true;
+    // Keep display names in sync with the code after renames.
+    const ai = cache.callers.find((c) => c.id === "caller:copilot");
+    if (ai && ai.name !== "Previs AI Copilot") { ai.name = "Previs AI Copilot"; dirty = true; }
     return cache;
   }
   return db();
