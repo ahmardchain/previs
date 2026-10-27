@@ -38,7 +38,7 @@ export default function Home() {
   const copilot = leaders.find((l) => l.id === "caller:copilot");
 
   return (
-    <main className="container" style={{ paddingTop: 48, paddingBottom: 120, display: "flex", flexDirection: "column", gap: 40 }}>
+    <main className="container" style={{ paddingTop: 48, paddingBottom: 40, display: "flex", flexDirection: "column", gap: 40 }}>
       <section style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-end", justifyContent: "space-between" }}>
         <div style={{ flex: "999 1 520px", minWidth: 0, display: "flex", flexDirection: "column", gap: 18 }}>
           <span className="eyebrow" style={{ letterSpacing: ".22em" }}>Paper-trade · sports &amp; crypto</span>
