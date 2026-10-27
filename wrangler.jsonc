@@ -13,7 +13,7 @@
   "vars": {
     "MEMWAL_SERVER_URL": "https://relayer.memory.walrus.xyz",
     "MEMWAL_NAMESPACE": "previs",
-    "TATUM_SUI_RPC": "https://sui-mainnet.gateway.tatum.io"
+    "TATUM_SUI_GRAPHQL": "https://sui-mainnet.gateway.tatum.io/graphql"
   },
   // Secrets (set in the dashboard or with `wrangler secret put`):
   // MEMWAL_KEY, MEMWAL_ACCOUNT_ID, TATUM_API_KEY, optional ANTHROPIC_API_KEY, PREVIS_ADMIN_KEY

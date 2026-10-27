@@ -21,10 +21,12 @@ Built for **Total Recall — Tatum × Walrus Memory Hackathon**, track *Markets 
 
 Code: [`src/lib/memory.ts`](src/lib/memory.ts) (remember/recall), [`src/lib/copilot.ts`](src/lib/copilot.ts) (how memories change advice), [`src/app/api/resolve/route.ts`](src/app/api/resolve/route.ts) (learning from results).
 
-## How it uses Tatum (Sui Mainnet RPC)
+## How it uses Tatum (Sui Mainnet gateway)
 
-- `sui_getLatestCheckpointSequenceNumber` — stamps every receipt with the checkpoint at save time (proof the pick came first).
-- `suix_getBalance` + `suix_queryTransactionBlocks` — when you connect a Sui address, Previs reads your SUI balance and recent activity and remembers your experience level, so the copilot can explain things more simply to newcomers.
+Sui has deprecated JSON-RPC, so Previs queries Tatum's Sui gateway over **GraphQL** (`https://sui-mainnet.gateway.tatum.io/graphql`, `x-api-key` header):
+
+- `checkpoint { sequenceNumber }` — stamps every receipt with the latest Sui checkpoint at save time (proof the pick came first).
+- `address { balance(coinType: "0x2::sui::SUI") }` + `transactions(filter: { sentAddress })` — when you connect a Sui address, Previs reads your SUI balance and recent activity and remembers your experience level, so the copilot can explain things more simply to newcomers.
 
 Code: [`src/lib/sui.ts`](src/lib/sui.ts).
 

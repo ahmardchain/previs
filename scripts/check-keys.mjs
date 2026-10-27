@@ -7,13 +7,13 @@ const bad = (m) => console.log(`✗ ${m}`);
 
 if (process.env.TATUM_API_KEY) {
   try {
-    const res = await fetch(process.env.TATUM_SUI_RPC || "https://sui-mainnet.gateway.tatum.io", {
+    const res = await fetch(process.env.TATUM_SUI_GRAPHQL || "https://sui-mainnet.gateway.tatum.io/graphql", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": process.env.TATUM_API_KEY },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "sui_getLatestCheckpointSequenceNumber" }),
+      body: JSON.stringify({ query: "query { checkpoint { sequenceNumber } }" }),
     });
     const j = await res.json();
-    j.result ? ok(`Tatum Sui RPC works — latest checkpoint ${j.result}`) : bad(`Tatum: ${JSON.stringify(j.error ?? j)}`);
+    j.data?.checkpoint ? ok(`Tatum Sui works — latest checkpoint ${j.data.checkpoint.sequenceNumber}`) : bad(`Tatum: ${JSON.stringify(j.errors ?? j)}`);
   } catch (e) { bad(`Tatum: ${e.message}`); }
 } else bad("TATUM_API_KEY not set");
 
