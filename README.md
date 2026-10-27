@@ -142,16 +142,13 @@ Walrus Memory is the product, not a log. It's read before **every** copilot answ
 | `previs-credibility` *(shared)* | `"<caller> called YES on … and was right. Now right 15 of 27."` | A market settles | Recalled to decide whose calls to trust on that league |
 
 ```mermaid
-flowchart LR
-    U[You] -- "my limit is 3%" --> C[AI Copilot]
-    C -- remember --> W[(Walrus Memory<br/>Mainnet)]
-    U -- "what's your pick?" --> C
-    W -- recall --> C
-    C -- "pick + Because I remember" --> U
-    U -- save pick --> R[Receipt]
-    R -- remember --> W
-    S[Market settles] -- results --> W
-    W -- credibility --> C
+flowchart TB
+    A["① You tell it a rule<br/><i>“my limit is 3% per trade”</i>"] --> W
+    B["② You save a pick<br/><i>receipt + Sui checkpoint</i>"] --> W
+    S["③ The market settles<br/><i>won / lost, caller credibility</i>"] --> W
+    W[("Walrus Memory · Mainnet<br/>your namespace + shared credibility")]
+    W -- "recalled before every answer" --> C["AI Copilot"]
+    C --> O["Pick · confidence · amount<br/><b>Because I remember…</b>"]
 ```
 
 **Engineering notes**
