@@ -20,7 +20,7 @@ async function rpc<T>(method: string, params: unknown[] = []): Promise<T> {
   const body = await res.text();
   let json: { result?: T; error?: { message: string } };
   try { json = JSON.parse(body); } catch { throw new Error(`Tatum RPC ${res.status}: ${body.slice(0, 160)}`); }
-  if (!res.ok || json.error) throw new Error(json.error?.message || `Tatum RPC ${res.status}`);
+  if (!res.ok || json.error) throw new Error(`Tatum RPC ${res.status} at ${new URL(GATEWAY).host}: ${json.error?.message ?? body.slice(0, 160)}`);
   return json.result as T;
 }
 
