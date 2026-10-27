@@ -45,11 +45,14 @@ function parseLimitPct(mems: Memory[]): number | null {
   return null;
 }
 
-export async function advise(userId: string, market: Market): Promise<Advice> {
-  const [mine, cred] = await Promise.all([
+export async function advise(userId: string, market: Market, recentFacts: string[] = []): Promise<Advice> {
+  const [recalled, cred] = await Promise.all([
     recall(userNs(userId), `habits risk limit favourite teams results on ${market.title}`, 8),
     recall(CRED_NS, `who is reliable on ${market.league} ${market.category}`, 5),
   ]);
+  // Facts the user just told us may not be indexed on Walrus yet; put them first.
+  const known = new Set(recalled.map((m) => m.text));
+  const mine: Memory[] = [...recentFacts.filter((t) => !known.has(t)).map((text) => ({ text, blobId: "recent" }) as Memory), ...recalled];
 
   // 1) What do proven callers say? Weight each call by their track record.
   const calls = db().picks.filter((p) => p.marketId === market.id && p.source === "caller" && p.status === "open");
@@ -184,7 +187,10 @@ function findMarket(q: string): Market | undefined {
   return bestScore >= 1 ? best : undefined;
 }
 
-export async function ask(userId: string, question: string, marketId?: string): Promise<CopilotReply> {
+// Only facts in the exact form extractFact() writes are accepted from the browser.
+const FACT_FORMS = [/^User's risk limit: max \d{1,2}(?:\.\d)?% of balance per trade\.$/, /^User supports [A-Za-z][\w.]*(?: [A-Z][\w.]*)?\.$/];
+
+export async function ask(userId: string, question: string, marketId?: string, recentFacts: string[] = []): Promise<CopilotReply> {
   const q = question.trim();
   let learned: string | undefined;
   const fact = extractFact(q);
@@ -192,6 +198,8 @@ export async function ask(userId: string, question: string, marketId?: string): 
     await remember(userNs(userId), fact);
     learned = fact;
   }
+  const recent = [...recentFacts, ...(learned ? [learned] : [])].filter((t) => t.length <= 120 && FACT_FORMS.some((re) => re.test(t)));
+  const adviseFor = (m: Market) => advise(userId, m, recent);
 
   // A pure "here's a fact about me" message gets a confirmation, not a pick.
   const market = (marketId && getMarket(marketId)) || (learned ? undefined : findMarket(q));
@@ -199,7 +207,7 @@ export async function ask(userId: string, question: string, marketId?: string): 
     if (learned) {
       return { text: "Got it — I'll remember that and use it in every pick from now on.", learned, suggestions: ["Show me the best pick today", "What does 58% mean?"] };
     }
-    const all = await Promise.all(listMarkets().filter((m) => !m.live).map((m) => advise(userId, m)));
+    const all = await Promise.all(listMarkets().filter((m) => !m.live).map(adviseFor));
     const best = all.sort((a, b) => b.confidence - a.confidence).slice(0, 3);
     const lines = best.map((a) => `• ${a.marketTitle} → ${a.side === "yes" ? "Yes" : "No"} (${a.label.toLowerCase()}, ${a.confidence}%)`);
     return {
@@ -208,7 +216,7 @@ export async function ask(userId: string, question: string, marketId?: string): 
     };
   }
 
-  const advice = await advise(userId, market);
+  const advice = await adviseFor(market);
   const sideWord = advice.side === "yes" ? "Yes" : "No";
   let text: string;
   if (/mean|what is|explain|how does/i.test(q)) {

@@ -83,6 +83,24 @@ function AdviceCard({ a, onUse }: { a: AdviceDTO; onUse?: (a: AdviceDTO) => void
   );
 }
 
+// Facts the copilot just confirmed. Walrus indexes new memories in the background and
+// Workers KV can lag for up to a minute, so the browser sends these along with the next
+// few questions; the server only accepts them in the exact form it wrote them.
+const FACT_TTL = 15 * 60 * 1000;
+function recentFacts(userId: string): string[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(`previs.facts.${userId}`) || "[]") as { t: string; at: number }[];
+    return list.filter((f) => Date.now() - f.at < FACT_TTL).map((f) => f.t).slice(-10);
+  } catch { return []; }
+}
+function rememberFact(userId: string, text: string) {
+  try {
+    const key = `previs.facts.${userId}`;
+    const list = (JSON.parse(localStorage.getItem(key) || "[]") as { t: string; at: number }[]).filter((f) => f.t !== text && Date.now() - f.at < FACT_TTL);
+    localStorage.setItem(key, JSON.stringify([...list, { t: text, at: Date.now() }].slice(-10)));
+  } catch {}
+}
+
 export function CopilotChat({ marketId, compact = false, onUse }: { marketId?: string; compact?: boolean; onUse?: (a: AdviceDTO) => void }) {
   const { userId } = useUser();
   const [markets, setMarkets] = useState<MarketDTO[]>([]);
@@ -108,10 +126,11 @@ export function CopilotChat({ marketId, compact = false, onUse }: { marketId?: s
       const r = await fetch("/api/copilot", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ userId, question: q, marketId: selected }),
+        body: JSON.stringify({ userId, question: q, marketId: selected, recent: recentFacts(userId) }),
       });
       const reply = (await r.json()) as CopilotReplyDTO;
       if (!r.ok) throw new Error(reply.error);
+      if (reply.learned) rememberFact(userId, reply.learned);
       setMsgs((m) => [...m, { role: "copilot", reply }]);
     } catch {
       setMsgs((m) => [...m, { role: "copilot", reply: { text: "Something went wrong. Try again in a moment.", suggestions: [] } }]);

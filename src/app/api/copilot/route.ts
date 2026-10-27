@@ -6,12 +6,13 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   await load();
-  const body = (await req.json().catch(() => ({}))) as { userId?: string; question?: string; marketId?: string };
+  const body = (await req.json().catch(() => ({}))) as { userId?: string; question?: string; marketId?: string; recent?: unknown };
   const userId = userIdFrom(body.userId);
   const question = String(body.question ?? "").slice(0, 2000);
   if (!userId) return Response.json({ error: "Missing user" }, { status: 400 });
   if (!question.trim() && !body.marketId) return Response.json({ error: "Ask something" }, { status: 400 });
-  const reply = await ask(userId, question || "What's your pick?", body.marketId || undefined);
+  const recent = Array.isArray(body.recent) ? body.recent.filter((x): x is string => typeof x === "string").slice(0, 10) : [];
+  const reply = await ask(userId, question || "What's your pick?", body.marketId || undefined, recent);
   await flush();
   return Response.json(reply);
 }
