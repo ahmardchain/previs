@@ -7,6 +7,7 @@ const TATUM_KEY = process.env.TATUM_API_KEY;
 const GATEWAY = process.env.TATUM_SUI_RPC || "https://sui-mainnet.gateway.tatum.io";
 
 export const tatumLive = Boolean(TATUM_KEY);
+export let lastTatumError: string | null = null;
 
 async function rpc<T>(method: string, params: unknown[] = []): Promise<T> {
   const res = await fetch(GATEWAY, {
@@ -16,7 +17,9 @@ async function rpc<T>(method: string, params: unknown[] = []): Promise<T> {
     cache: "no-store",
     signal: AbortSignal.timeout(10000),
   });
-  const json = (await res.json()) as { result?: T; error?: { message: string } };
+  const body = await res.text();
+  let json: { result?: T; error?: { message: string } };
+  try { json = JSON.parse(body); } catch { throw new Error(`Tatum RPC ${res.status}: ${body.slice(0, 160)}`); }
   if (!res.ok || json.error) throw new Error(json.error?.message || `Tatum RPC ${res.status}`);
   return json.result as T;
 }
@@ -24,8 +27,11 @@ async function rpc<T>(method: string, params: unknown[] = []): Promise<T> {
 export async function latestCheckpoint(): Promise<string | null> {
   if (!tatumLive) return null;
   try {
-    return await rpc<string>("sui_getLatestCheckpointSequenceNumber");
+    const r = await rpc<string>("sui_getLatestCheckpointSequenceNumber");
+    lastTatumError = null;
+    return r;
   } catch (e) {
+    lastTatumError = e instanceof Error ? e.message : String(e);
     console.error("[tatum] checkpoint failed", e);
     return null;
   }

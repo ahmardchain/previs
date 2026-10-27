@@ -230,6 +230,8 @@ export async function ask(userId: string, question: string, marketId?: string): 
 const SYSTEM =
   "You are Previs AI Copilot, a friendly trading buddy for beginners on a paper-trading prediction market. Rewrite the draft answer in 1-3 short plain sentences. Keep every number exactly as given. No jargon, no disclaimers, no markdown.";
 
+export let lastAiNote: string | null = null;
+
 interface AIBinding { run(model: string, input: unknown): Promise<unknown> }
 
 async function workersAI(): Promise<AIBinding | null> {
@@ -252,6 +254,7 @@ async function maybePolish(text: string, question: string, advice: Advice): Prom
   let out: string | undefined;
   try {
     const ai = await workersAI();
+    if (!ai) lastAiNote = "No Workers AI binding";
     if (ai) {
       // Free on Cloudflare's Workers Free plan (10,000 neurons/day).
       const r = (await ai.run(process.env.WORKERS_AI_MODEL || "@cf/google/gemma-4-26b-a4b-it", {
@@ -259,6 +262,7 @@ async function maybePolish(text: string, question: string, advice: Advice): Prom
         max_tokens: 200,
       })) as { response?: string; choices?: { message?: { content?: string } }[] };
       out = r.response ?? r.choices?.[0]?.message?.content;
+      lastAiNote = out ? null : `Workers AI returned no text: ${JSON.stringify(r).slice(0, 160)}`;
     } else if (process.env.ANTHROPIC_API_KEY) {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -270,8 +274,10 @@ async function maybePolish(text: string, question: string, advice: Advice): Prom
       out = json.content?.find((c) => c.type === "text")?.text;
     }
   } catch (e) {
+    lastAiNote = `AI error: ${e instanceof Error ? e.message : String(e)}`.slice(0, 200);
     console.warn("[ai] phrasing failed, using draft", e);
   }
   out = out?.trim();
+  if (out && !keepsNumbers(text, out)) lastAiNote = `AI reply dropped a number, used draft: ${out.slice(0, 120)}`;
   return out && keepsNumbers(text, out) ? out : text;
 }
