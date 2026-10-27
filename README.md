@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Previs — every call, on the record
 
-## Getting Started
+Previs is a paper-trading prediction market for sports and crypto, with a copilot that **remembers how you trade** and **saves every pick before the result**.
 
-First, run the development server:
+Built for **Total Recall — Tatum × Walrus Memory Hackathon**, track *Markets & Sports Prediction*.
+
+## What it does
+
+- **Simple copilot.** Pick any market and ask. You get one clear pick (Yes/No), a confidence label, short reasons, and how much to put in.
+- **Memory that changes the answer.** Tell it "my limit is 3% per trade" or "I support Arsenal", make picks, watch results come in. Every one of those becomes a Walrus memory, and the copilot's next answer shows a **"Because I remember…"** box explaining exactly what changed (smaller size after a losing streak, a warning when you're betting on your own team, a lesson from your last pick in that league).
+- **Receipts.** Saving a pick writes it to Walrus Memory *before* the event and stamps it with the current **Sui checkpoint, read through Tatum's Sui RPC**, plus a SHA-256 fingerprint. It can't be quietly edited later.
+- **Who to trust.** Every caller (including the copilot itself) is graded only on picks saved before the result. Credibility scores feed back into the copilot, and each result is written to a shared credibility memory, so Previs learns who is worth listening to.
+- **Pick journal.** The Portfolio page shows your record, open picks with their receipts, and everything the copilot remembers about you.
+
+## How it uses Walrus Memory
+
+| Namespace | What's written | When | How it's used |
+|---|---|---|---|
+| `previs-u-<hash>` (one per user) | Risk limits, teams you support, every pick, every result | You tell the copilot something · you save/place a pick · a market settles | Recalled before every answer to size the bet and write the "Because I remember" lines |
+| `previs-credibility` | "<caller> called YES on … and was right. Now right 15 of 27." | A market settles | Recalled to decide whose calls to trust |
+
+Code: [`src/lib/memory.ts`](src/lib/memory.ts) (remember/recall), [`src/lib/copilot.ts`](src/lib/copilot.ts) (how memories change advice), [`src/app/api/resolve/route.ts`](src/app/api/resolve/route.ts) (learning from results).
+
+## How it uses Tatum (Sui Mainnet RPC)
+
+- `sui_getLatestCheckpointSequenceNumber` — stamps every receipt with the checkpoint at save time (proof the pick came first).
+- `suix_getBalance` + `suix_queryTransactionBlocks` — when you connect a Sui address, Previs reads your SUI balance and recent activity and remembers your experience level, so the copilot can explain things more simply to newcomers.
+
+Code: [`src/lib/sui.ts`](src/lib/sui.ts).
+
+## Run it
 
 ```bash
+npm install
+cp .env.example .env.local   # add MEMWAL_KEY, MEMWAL_ACCOUNT_ID, TATUM_API_KEY
+node --env-file=.env.local scripts/check-keys.mjs   # confirms both keys work and writes 1 memory
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Without keys the app still runs in **demo mode** (memories go to a local file, no checkpoints). The header shows which mode is live.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Demo script (3 minutes)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Copilot** → type `My limit is 3% per trade` → "Remembered" chip appears.
+2. Type `I support Arsenal`.
+3. Choose *Arsenal beat Chelsea* → `What's your pick?` → note the **Because I remember** box (limit + team warning) → **Save my pick** → receipt with Sui checkpoint + Walrus blob.
+4. Open a BTC market → place a paper trade.
+5. **Portfolio** → settle both markets as losses → open the copilot on another football market → it now says you've lost twice and keeps the size small, and cites your last football result.
+6. **Markets** → leaderboard has moved; the copilot's own record updated.
 
-## Learn More
+That flow writes 10+ memories to Walrus Mainnet.
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next.js 16 (App Router) · TypeScript · `@mysten-incubation/memwal` · Tatum Sui RPC gateway · optional Claude for phrasing (numbers always come from Previs's own logic).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Hackathon checklist
 
-## Deploy on Vercel
+- [x] Walrus Memory integrated, writing on Mainnet (`MEMWAL_SERVER_URL=https://relayer.memory.walrus.xyz`)
+- [x] Tatum Sui RPC for on-chain data
+- [ ] 10+ memories on Mainnet — run the demo script once with real keys
+- [ ] Blog post — draft in [`BLOG.md`](BLOG.md)
+- [ ] Working demo (deploy) + public repo
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Markets and odds are demo data for paper trading. No real money is used.
