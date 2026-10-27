@@ -12,7 +12,7 @@
   <a href="https://previs.ahmardchain.workers.dev">
     <img src="https://img.shields.io/badge/Live_App-previs.ahmardchain.workers.dev-c6f24e?style=for-the-badge&labelColor=0b0b0c" alt="Live app" />
   </a>
-  <a href="./docs/previs-demo.mp4">
+  <a href="https://youtu.be/YsVcd4Fa34c">
     <img src="https://img.shields.io/badge/Demo-Watch_Video-0b0b0c?style=for-the-badge&logo=youtube&logoColor=white" alt="Demo video" />
   </a>
   <a href="https://x.com/ahmardchain">
@@ -52,9 +52,9 @@ Every pick is also a **receipt**: written to Walrus *before* the event and stamp
 
 <div align="center">
 
-[![Watch the Previs demo](./docs/demo-thumbnail.jpg)](./docs/previs-demo.mp4)
+[![Watch the Previs demo](./docs/demo-thumbnail.jpg)](https://youtu.be/YsVcd4Fa34c)
 
-**[▶ Watch the 2-minute demo](./docs/previs-demo.mp4)** &nbsp;·&nbsp; 𝕏 **[Launch post on X](https://x.com/Ahmardchain/status/2115117118614069404)** &nbsp;·&nbsp; 🌐 **Live: [previs.ahmardchain.workers.dev](https://previs.ahmardchain.workers.dev)**
+**[▶ Watch the demo on YouTube](https://youtu.be/YsVcd4Fa34c)** &nbsp;·&nbsp; 𝕏 **[Launch post on X](https://x.com/Ahmardchain/status/2115117118614069404)** &nbsp;·&nbsp; 🌐 **Live: [previs.ahmardchain.workers.dev](https://previs.ahmardchain.workers.dev)**
 
 </div>
 
@@ -240,7 +240,7 @@ sequenceDiagram
 | Memory that matters, not storage for its own sake | Recalled before every answer; the *Because I remember* box shows the exact memories that changed the pick and the amount |
 | Tatum for on-chain data | Sui checkpoints on every receipt; wallet balance and activity via Tatum's Sui GraphQL gateway |
 | 10+ memories on Mainnet | The demo flow alone writes 10+; the live app has written dozens (see `/api/status`) |
-| Working demo + public repo | Live on Cloudflare Workers; this repo; [demo video](./docs/previs-demo.mp4) |
+| Working demo + public repo | Live on Cloudflare Workers; this repo; [demo video](https://youtu.be/YsVcd4Fa34c) |
 | Track 01 — Markets & Sports Prediction | Sports and crypto markets, a copilot that learns from your results, and a provable caller leaderboard |
 
 ---
