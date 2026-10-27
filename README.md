@@ -54,7 +54,7 @@ Every pick is also a **receipt**: written to Walrus *before* the event and stamp
 
 [![Watch the Previs demo](./docs/demo-thumbnail.jpg)](./docs/previs-demo.mp4)
 
-**[▶ Watch the 2-minute demo](./docs/previs-demo.mp4)** &nbsp;·&nbsp; 🌐 **Live: [previs.ahmardchain.workers.dev](https://previs.ahmardchain.workers.dev)**
+**[▶ Watch the 2-minute demo](./docs/previs-demo.mp4)** &nbsp;·&nbsp; 𝕏 **[Launch post on X](https://x.com/Ahmardchain/status/2115117118614069404)** &nbsp;·&nbsp; 🌐 **Live: [previs.ahmardchain.workers.dev](https://previs.ahmardchain.workers.dev)**
 
 </div>
 
@@ -383,7 +383,7 @@ Built by **Ahmad (AHMARD)** for the Total Recall hackathon.
 
 | | |
 |---|---|
-| X | [@ahmardchain](https://x.com/ahmardchain) |
+| X | [@ahmardchain](https://x.com/ahmardchain) · [launch post](https://x.com/Ahmardchain/status/2115117118614069404) |
 | Telegram | [@leveltechceo](https://t.me/leveltechceo) |
 | GitHub | [ahmardchain](https://github.com/ahmardchain) |
 
